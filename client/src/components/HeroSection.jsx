@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Navbar from './Navbar'
+import { useNavigate } from 'react-router-dom'
 
 const categories = [
   'Business',
@@ -50,9 +51,7 @@ function AnalyzerCard() {
   const [customCategory, setCustomCategory] = useState('')
   const [message, setMessage] = useState('')
 
-  const activeCategory = selectedCategory === 'Custom' && customCategory.trim()
-    ? customCategory.trim()
-    : selectedCategory
+  const navigate = useNavigate()
 
   const handleCategoryClick = (category) => {
     setSelectedCategory(category)
@@ -60,17 +59,7 @@ function AnalyzerCard() {
   }
 
   const handleAnalyze = () => {
-    if (!contentUrl.trim()) {
-      setMessage('Please paste a YouTube, Instagram, Reel, Short, or TikTok URL first.')
-      return
-    }
-
-    if (selectedCategory === 'Custom' && !customCategory.trim()) {
-      setMessage('Add your custom category name before analyzing.')
-      return
-    }
-
-    setMessage(`Ready to analyze this ${activeCategory} content link.`)
+    navigate('/analyze-content')
   }
 
   return (

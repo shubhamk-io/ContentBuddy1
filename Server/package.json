@@ -7,13 +7,22 @@
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  "keywords": ["express", "nodejs"],
+  "keywords": [
+    "express",
+    "nodejs"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
+    "@better-auth/infra": "^0.2.14",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "better-auth": "^1.6.20",
+    "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "cors": "^2.8.5"
+    "express": "^4.18.2",
+    "pg": "^8.22.0",
+    "prisma": "^7.8.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
