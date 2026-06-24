@@ -59,6 +59,9 @@ function AnalyzerCard() {
   }
 
   const handleAnalyze = () => {
+
+    
+
     navigate('/analyze-content')
   }
 

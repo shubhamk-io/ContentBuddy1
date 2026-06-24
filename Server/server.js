@@ -6,6 +6,7 @@ import { auth } from "./src/libs/auth.js";
 
 dotenv.config();
 
+
 const app = express();
 
 // Auth routes PEHLE — json middleware se pehle
