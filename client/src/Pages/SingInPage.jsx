@@ -6,9 +6,8 @@ import { authClient } from "../lib/authClient";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-export default function SignUpPage() {
+export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -35,7 +34,7 @@ export default function SignUpPage() {
     e.preventDefault();
 
     const { data, error } = await authClient.signUp.email({
-      name: name,
+
       email: email,
       password: password,
       callbackURL: "https://example.com/callback",
