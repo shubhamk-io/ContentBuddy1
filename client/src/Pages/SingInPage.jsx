@@ -33,12 +33,10 @@ export default function SignInPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { data, error } = await authClient.signUp.email({
-
-      email: email,
-      password: password,
-      callbackURL: "https://example.com/callback",
-    });
+    const { data, error } = await authClient.signIn.email({
+  email: email,
+  password: password,
+});
 
     if (error) {
       toast.error(error.message);
@@ -154,6 +152,7 @@ export default function SignInPage() {
             Don't have an account?
             <button
               type="button"
+              onClick={()=>navigate("/singup")}
               className="ml-1 text-indigo-600 hover:text-indigo-500 font-medium"
             >
               Create Account

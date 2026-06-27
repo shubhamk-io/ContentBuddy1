@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -6,17 +8,21 @@ import { auth } from "./src/libs/auth.js";
 
 dotenv.config();
 
+console.log("Google ID:", process.env.GOOGLE_CLIENT_ID ? "✅ Loaded" : "❌ Missing");
+console.log("Google Secret:", process.env.GOOGLE_CLIENT_SECRET ? "✅ Loaded" : "❌ Missing");
 
 const app = express();
 
-// Auth routes PEHLE — json middleware se pehle
-app.all("/api/auth/{*any}", toNodeHandler(auth));
-
+// ✅ FIX 3: CORS pehle lagao — auth routes se upar
 app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:5173",
   credentials: true,
 }));
+
 app.use(express.json());
+
+// Auth routes
+app.all("/api/auth/*", toNodeHandler(auth));
 
 app.get("/", (req, res) => {
   res.json({ message: "ContentBuddy API running" });

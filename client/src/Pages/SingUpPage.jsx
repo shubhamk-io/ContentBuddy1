@@ -26,6 +26,7 @@ const socialSigninGoogle = async () => {
   try {
     await authClient.signIn.social({
       provider: "google",
+      callbackURL: "/",
       fetchOptions: {
         onSuccess: () => {
           toast.success("Welcome to ContentBuddy");
@@ -219,6 +220,7 @@ return (
       </div>
     </div>
   </div>
+  
 );
 
 
