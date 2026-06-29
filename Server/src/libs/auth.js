@@ -6,14 +6,13 @@ import prisma from "./db.js";
 import dotenv from "dotenv";
 
 export const auth = betterAuth({
-  // ✅ FIX 1: baseURL add karo — Google OAuth redirect ke liye zaroori hai
+  
   baseURL: process.env.SERVER_URL || "http://localhost:3000",
 
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
 
-  // ✅ FIX 2: trustedOrigins add karo — CORS issue fix hoga
   trustedOrigins: [
     process.env.CLIENT_URL || "http://localhost:5173",
   ],
