@@ -36,6 +36,12 @@ export default function SignInPage() {
     const { data, error } = await authClient.signIn.email({
   email: email,
   password: password,
+  fetchOptions:{
+    onSuccess:() => {
+      toast.success("Logged in Succesfully")
+      navigate("/dashboard")
+    }
+  }
 });
 
     if (error) {
@@ -44,7 +50,7 @@ export default function SignInPage() {
     }
 
     toast.success("Account Created Successfully");
-    navigate("/");
+    navigate("/dashboard");
   };
 
   return (

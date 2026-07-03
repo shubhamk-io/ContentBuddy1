@@ -26,11 +26,11 @@ const socialSigninGoogle = async () => {
   try {
     await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/",
+      callbackURL: "dashboard",
       fetchOptions: {
         onSuccess: () => {
           toast.success("Welcome to ContentBuddy");
-          navigate("/");
+          navigate("/dashboard");
         },
       },
     });
@@ -57,7 +57,13 @@ const handleSubmit = async (e) => {
     const { data, error } = await authClient.signUp.email({
       name:name,
       email:email,
-      password:password
+      password:password,
+      fetchOptions: {
+        onSuccess:() =>{
+          toast.success("Welcome to content Buddy")
+          navigate("/dashboard")
+        }
+      }
     });
 
     if (error) {
@@ -66,7 +72,7 @@ const handleSubmit = async (e) => {
     }
 
     toast.success("Account created successfully");
-    navigate("/");
+    navigate("/dashboard");
   } catch (error) {
     console.log(error);
     toast.error("Something went wrong");

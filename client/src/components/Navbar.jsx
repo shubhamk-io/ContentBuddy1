@@ -1,13 +1,55 @@
-import { Menu, X } from "lucide-react";
-import {useSession} from "../lib/authClient" 
-
+import { useState, useRef, useEffect } from "react";
+import { Menu, X, History, LogOut, ChevronDown } from "lucide-react";
+import { useSession, signOut } from "../lib/authClient";
 
 export default function Navbar() {
+  const { data: session, isPending } = useSession();
+  const user = session?.user;
+  const firstName = user?.name?.split(" ")[0];
 
-const {data:session , isPending} = useSession();
+  const [open, setOpen] = useState(false); // desktop dropdown
+  const [mobileOpen, setMobileOpen] = useState(false); // mobile menu
+  const dropdownRef = useRef(null);
+  const closeTimeout = useRef(null);
 
-const user = session?.user;
-const firstName = user?.name?.split("")[0]
+  // close desktop dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // lock body scroll when mobile menu open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
+  const handleMouseEnter = () => {
+    clearTimeout(closeTimeout.current);
+    setOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    closeTimeout.current = setTimeout(() => setOpen(false), 150);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setOpen(false);
+      setMobileOpen(false);
+      window.location.href = "/singin";
+    } catch (err) {
+      console.error("Sign out failed:", err);
+    }
+  };
 
   return (
     <nav className="absolute inset-x-0 top-0 z-20">
@@ -29,28 +71,161 @@ const firstName = user?.name?.split("")[0]
           <a href="#pricing" className="transition hover:text-[#111827]">Pricing</a>
         </div>
 
-        {/* <div className="flex shrink-0 items-center gap-4 text-sm font-semibold">
-          <a href="" className="hidden text-[#334155] transition hover:text-[#111827] sm:block">Login</a>
-          <a href="" className="rounded-full bg-gradient-to-r from-[#743cf1] to-[#367df5] px-3.5 py-2 text-xs font-bold text-white shadow-[0_6px_14px_rgba(67,91,229,0.22)] transition hover:-translate-y-0.5 sm:px-5 sm:py-2.5 sm:text-sm">
-              <span className="hidden min-[390px]:inline">Get Started Free</span>
-              <span className="min-[390px]:hidden">Start</span>
-            </a>
-          </div> */}
-
-
         <div className="flex items-center gap-3">
 
-          <div className="relative md:block hidden group">
-            <button className="rounded-full bg-white px-4 py-2 shadow font-bold hover:bg-gray-50">{firstName}</button>
+          {/* Desktop avatar dropdown */}
+          <div
+            ref={dropdownRef}
+            className="relative hidden md:block"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <button
+              onClick={() => setOpen((prev) => !prev)}
+              className="flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow font-bold hover:bg-gray-50 transition"
+            >
+              {user?.image ? (
+                <img
+                  src={user.image}
+                  alt={firstName}
+                  className="h-7 w-7 rounded-full object-cover ring-2 ring-[#7b3ff1]/20"
+                />
+              ) : (
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-[#7b3ff1] to-[#387df6] text-xs font-bold text-white">
+                  {firstName?.[0]?.toUpperCase()}
+                </span>
+              )}
+              <span className="max-w-[100px] truncate">{firstName}</span>
+              <ChevronDown
+                className={`h-3.5 w-3.5 text-[#475569] transition-transform duration-200 ${
+                  open ? "rotate-180" : ""
+                }`}
+              />
+            </button>
 
-            <div className="absolute right-0 mt-2 hidden w-48 rounded-xl border bg-[#713EF1] shadow-xl group-hover:block">
-              <a href=""></a>
+            <div
+              className={`absolute right-0 mt-2 w-52 origin-top-right rounded-xl border border-white/10 bg-[#713EF1] p-1.5 shadow-xl shadow-[#713EF1]/25 transition-all duration-200 ease-out ${
+                open
+                  ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
+                  : "pointer-events-none -translate-y-1 scale-95 opacity-0"
+              }`}
+            >
+              
+             <a   href="/history"
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-white"
+              >
+                <History className="h-4 w-4" />
+                History
+              </a>
+              <button
+                onClick={handleSignOut}
+                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-white"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </button>
             </div>
-
           </div>
+
+          {/* Mobile hamburger button */}
+          <button
+            onClick={() => setMobileOpen((prev) => !prev)}
+            className="grid h-10 w-10 place-items-center rounded-full bg-white shadow md:hidden"
+            aria-label="Toggle menu"
+          >
+            <div className="relative h-5 w-5">
+              <Menu
+                className={`absolute inset-0 h-5 w-5 text-[#111827] transition-all duration-200 ${
+                  mobileOpen ? "rotate-90 opacity-0" : "rotate-0 opacity-100"
+                }`}
+              />
+              <X
+                className={`absolute inset-0 h-5 w-5 text-[#111827] transition-all duration-200 ${
+                  mobileOpen ? "rotate-0 opacity-100" : "-rotate-90 opacity-0"
+                }`}
+              />
+            </div>
+          </button>
 
         </div>
       </div>
+
+      {/* Mobile menu panel */}
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-out md:hidden ${
+          mobileOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="mx-4 mb-4 rounded-2xl border border-black/5 bg-white shadow-xl sm:mx-6">
+
+          {/* User info */}
+          {user && (
+            <div className="flex items-center gap-3 border-b border-black/5 px-4 py-4">
+              {user?.image ? (
+                <img
+                  src={user.image}
+                  alt={firstName}
+                  className="h-10 w-10 rounded-full object-cover ring-2 ring-[#7b3ff1]/20"
+                />
+              ) : (
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-[#7b3ff1] to-[#387df6] text-sm font-bold text-white">
+                  {firstName?.[0]?.toUpperCase()}
+                </span>
+              )}
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-[#111827]">{user?.name}</p>
+                <p className="truncate text-xs text-[#64748b]">{user?.email}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Nav links */}
+          <div className="flex flex-col px-2 py-2 text-sm font-medium text-[#475569]">
+            
+          <a    href="#features"
+              onClick={() => setMobileOpen(false)}
+              className="rounded-lg px-3 py-2.5 transition hover:bg-[#f4f2ff] hover:text-[#111827]"
+            >
+              Features
+            </a>
+            
+            <a  href="#how-it-works"
+              onClick={() => setMobileOpen(false)}
+              className="rounded-lg px-3 py-2.5 transition hover:bg-[#f4f2ff] hover:text-[#111827]"
+            >
+              How It Works
+            </a>
+            
+            <a  href="#pricing"
+              onClick={() => setMobileOpen(false)}
+              className="rounded-lg px-3 py-2.5 transition hover:bg-[#f4f2ff] hover:text-[#111827]"
+            >
+              Pricing
+            </a>
+          </div>
+
+          {/* Profile actions */}
+          {user && (
+            <div className="flex flex-col gap-1 border-t border-black/5 px-2 py-2">
+              
+              <a  href="/history"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-[#475569] transition hover:bg-[#f4f2ff] hover:text-[#111827]"
+              >
+                <History className="h-4 w-4" />
+                History
+              </a>
+              <button
+                onClick={handleSignOut}
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-500 transition hover:bg-red-50"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </nav>
-  )
+  );
 }
