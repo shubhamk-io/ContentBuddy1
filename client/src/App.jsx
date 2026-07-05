@@ -5,6 +5,10 @@ import SignInPage from './Pages/SingInPage'
 import SingUpPage from './Pages/singUpPage'
 import ContentBuddyLanding from './Pages/ContentBuddyLanding'
 
+
+
+export const serverUrl = " http://localhost:3000";
+
 function App() {
   return (
     <BrowserRouter>

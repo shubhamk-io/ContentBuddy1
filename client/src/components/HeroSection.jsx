@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Navbar from './Navbar'
 import { useNavigate } from 'react-router-dom'
+import axios from "axios"
+import { serverUrl } from '../App'
 
 const categories = [
   'Business',
@@ -47,7 +49,7 @@ const features = [
 
 function AnalyzerCard() {
   const [contentUrl, setContentUrl] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('Marketing')
+  const [selectedCategory, setSelectedCategory] = useState('AI')
   const [customCategory, setCustomCategory] = useState('')
   const [message, setMessage] = useState('')
 
@@ -58,9 +60,30 @@ function AnalyzerCard() {
     setMessage('')
   }
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
 
-    
+    if (!contentUrl.trim()) {
+      return alert("Please Enter Video URL")
+    }
+
+    try {
+      const response = await axios.post(serverUrl + "api/analyze",
+        {
+          contentUrl,
+          selectedCategory,
+          customCategory
+        },
+        { withCredentials: true })
+
+        navigate("/dashboard")
+
+        console.log(response.data)
+
+
+    } catch (error) {
+console.log(error)
+    }
+
 
     navigate('/analyze-content')
   }
@@ -88,11 +111,10 @@ function AnalyzerCard() {
               key={category}
               type="button"
               onClick={() => handleCategoryClick(category)}
-              className={`rounded-full border px-3 py-2 text-xs font-semibold shadow-sm transition hover:-translate-y-0.5 sm:px-4 sm:py-2.5 sm:text-sm ${
-                category === selectedCategory
+              className={`rounded-full border px-3 py-2 text-xs font-semibold shadow-sm transition hover:-translate-y-0.5 sm:px-4 sm:py-2.5 sm:text-sm ${category === selectedCategory
                   ? 'border-transparent bg-gradient-to-r from-[#733cf1] to-[#347df5] text-white'
                   : 'border-slate-200 bg-[#f1f5f9] text-[#475569]'
-              }`}
+                }`}
             >
               {category}
             </button>
@@ -132,11 +154,10 @@ function AnalyzerCard() {
       </button>
 
       {message && (
-        <p className={`mt-3 rounded-[10px] px-3 py-2.5 text-center text-xs font-semibold ${
-          message.startsWith('Ready')
+        <p className={`mt-3 rounded-[10px] px-3 py-2.5 text-center text-xs font-semibold ${message.startsWith('Ready')
             ? 'bg-emerald-50 text-emerald-700'
             : 'bg-rose-50 text-rose-700'
-        }`}>
+          }`}>
           {message}
         </p>
       )}
