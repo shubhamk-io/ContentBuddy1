@@ -1,5 +1,5 @@
 
 
-export const comparaiveAnalystAgent = () => {
+export const comparativeAnalystAgent = () => {
     
 }
