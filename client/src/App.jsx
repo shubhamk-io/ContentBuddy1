@@ -14,11 +14,12 @@ function App() {
     <BrowserRouter>
       <main className="min-h-screen bg-[#f8fbff] font-['Inter',sans-serif] text-slate-900">
         <Routes>
+              <Route path='/' element={<ContentBuddyLanding />} />
           <Route path="/dashboard" element={<HeroSection/>} />
           <Route path="/analyze-content" element={<AnalyzePage />} />
          <Route path='/singup' element={<SingUpPage /> } />
          <Route path='/singin' element={<SignInPage /> } />
-         <Route path='/' element={<ContentBuddyLanding />} />
+     
         </Routes>
       </main>
     </BrowserRouter>

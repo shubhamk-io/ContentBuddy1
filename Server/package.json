@@ -16,6 +16,9 @@
   "license": "ISC",
   "dependencies": {
     "@better-auth/infra": "^0.2.14",
+    "@langchain/anthropic": "^1.5.1",
+    "@langchain/core": "^1.2.2",
+    "@langchain/langgraph": "^1.4.7",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "better-auth": "^1.6.20",

@@ -24,9 +24,9 @@ const navigate = useNavigate();
 
 const socialSigninGoogle = async () => {
   try {
-    await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "dashboard",
+   await authClient.signIn.social({
+  provider: "google",
+  callbackURL: "http://localhost:5173/dashboard",
       fetchOptions: {
         onSuccess: () => {
           toast.success("Welcome to ContentBuddy");

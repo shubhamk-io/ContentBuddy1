@@ -3,17 +3,19 @@ import { useSession } from "../lib/authClient";
 import { useNavigate } from "react-router-dom";
 
 /**
- * ContentBuddy — Landing Page (v4, premium redesign)
+ * ContentBuddy — Landing Page (v5, responsive pass)
  *
- * Same business logic, hooks, routing, and auth as v3 — only the visuals
- * changed. What's new visually:
+ * Same business logic, hooks, routing, and auth as before — only the visuals
+ * and responsive behavior changed:
  *  - Mesh-gradient + grain hero background with layered radial glow blobs
- *  - Animated glowing "Live Analysis" badge above the headline
- *  - 8 glassmorphic floating stat cards around the hero, staggered sizes/positions
- *  - 7 floating social platform chips (YouTube, Instagram, TikTok, LinkedIn, X,
- *    Facebook, Threads) with independent float/rotate/glow-on-hover
+ *  - 4 glassmorphic floating stat cards + 4 floating social icons on desktop
  *  - Punchier gradient CTA with shine sweep + arrow travel
- *  - Refined 8px spacing rhythm throughout
+ *  - Desktop (>980px): full nav links + floating hero composition
+ *  - Tablet/Mobile (≤980px): floating hero cards hidden (kept the layout
+ *    clean rather than cramming them in), nav links collapse into a
+ *    hamburger + slide-down dropdown menu
+ *  - Small phones (≤640px): tighter headline size, nav padding, and
+ *    platform-icon sizing so nothing overflows narrow viewports
  *
  * NOTE: the original file referenced an undefined `handleAuthSuccess` when
  * wiring up <AuthPage onSuccess={...}/>, which would throw at render time.
@@ -64,6 +66,7 @@ export default function ContentBuddyLanding() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authMode, setAuthMode] = useState("signup");
   const [ctaHover, setCtaHover] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { data: session, isPending } = useSession();
   const navigate = useNavigate();
@@ -149,7 +152,22 @@ export default function ContentBuddyLanding() {
 
         .cb-input:focus { outline: none; border-color: #5B4FE8 !important; box-shadow: 0 0 0 4px rgba(91,79,232,0.12); }
 
-        @media (max-width: 980px) { .cb-hero-deco { display: none !important; } }
+        @media (max-width: 980px) {
+          .cb-hero-deco { display: none !important; }
+          .cb-hero-content { margin-top: 8px !important; }
+          .cb-nav-links { display: none !important; }
+          .cb-hamburger { display: flex !important; }
+        }
+        @media (min-width: 981px) {
+          .cb-mobile-menu { display: none !important; }
+        }
+        @media (max-width: 640px) {
+          .cb-headline { font-size: clamp(28px, 9vw, 38px) !important; }
+          .cb-platform-row { gap: 10px !important; }
+          .cb-platform-icon { width: 36px !important; height: 36px !important; }
+          .cb-nav-wrap { padding: 14px 16px !important; }
+          .cb-hero-section { padding: 8px 16px 32px !important; }
+        }
         @media (prefers-reduced-motion: reduce) {
           .cb-badge, .cb-mock, .cb-glow-badge, .cb-orbit-icon { animation: none !important; }
         }
@@ -178,6 +196,8 @@ export default function ContentBuddyLanding() {
           setAuthMode={setAuthMode}
           ctaHover={ctaHover}
           setCtaHover={setCtaHover}
+          mobileMenuOpen={mobileMenuOpen}
+          setMobileMenuOpen={setMobileMenuOpen}
         />
       ) : (
         <AuthPage authMode={authMode} setAuthMode={setAuthMode} onBack={() => setPage("landing")} onSuccess={handleAuthSuccess} />
@@ -269,11 +289,11 @@ function StatCard({ card }) {
   );
 }
 
-function Landing({ isLoggedIn, handleGetStarted, setPage, setAuthMode }) {
+function Landing({ isLoggedIn, handleGetStarted, setPage, setAuthMode, mobileMenuOpen, setMobileMenuOpen }) {
   return (
     <div style={{ position: "relative", zIndex: 1 }}>
       {/* NAV */}
-      <nav className="flex items-center justify-between" style={{ maxWidth: 1180, margin: "0 auto", padding: "16px 24px" }}>
+      <nav className="flex items-center justify-between cb-nav-wrap" style={{ maxWidth: 1180, margin: "0 auto", padding: "16px 24px", position: "relative" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 34, height: 34, borderRadius: 10, background: "linear-gradient(135deg, #5B4FE8, #3B82F6)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 16px -4px rgba(91,79,232,0.5)" }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.2 6.8H21l-5.6 4.1 2.2 6.9L12 15.7 6.4 19.8l2.2-6.9L3 8.8h6.8L12 2z" fill="white" /></svg>
@@ -281,7 +301,7 @@ function Landing({ isLoggedIn, handleGetStarted, setPage, setAuthMode }) {
           <span style={{ fontFamily: "Sora", fontWeight: 700, fontSize: 19, color: "#14132B" }}>ContentBuddy</span>
         </div>
 
-        <div className="hidden md:flex" style={{ gap: 36, fontFamily: "Inter", fontSize: 14.5, fontWeight: 500, color: "#6E6B8A" }}>
+        <div className="cb-nav-links" style={{ display: "flex", gap: 36, fontFamily: "Inter", fontSize: 14.5, fontWeight: 500, color: "#6E6B8A" }}>
           <a href="#" className="cb-navlink">Products</a>
           <a href="#" className="cb-navlink">Solutions</a>
           <a href="#" className="cb-navlink">Tools</a>
@@ -292,18 +312,44 @@ function Landing({ isLoggedIn, handleGetStarted, setPage, setAuthMode }) {
           {isLoggedIn ? (
             <img src={AVATARS[0]} alt="Account" style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid white", boxShadow: "0 0 0 1.5px #ECE9FB" }} />
           ) : (
-            <>
-              
-              <button onClick={handleGetStarted} className="cb-cta" style={{ fontFamily: "Inter", fontWeight: 600, fontSize: 14.5, color: "white", border: "none", borderRadius: 10, padding: "10px 20px", cursor: "pointer" }}>
-                Get Started <span className="cb-cta-arrow">→</span>
-              </button>
-            </>
+            <button onClick={handleGetStarted} className="cb-cta" style={{ fontFamily: "Inter", fontWeight: 600, fontSize: 14.5, color: "white", border: "none", borderRadius: 10, padding: "10px 20px", cursor: "pointer" }}>
+              Get Started <span className="cb-cta-arrow">→</span>
+            </button>
           )}
+
+          {/* Hamburger — only rendered visually on small/tablet screens via CSS */}
+          <button
+            className="cb-hamburger"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+            style={{ display: "none", alignItems: "center", justifyContent: "center", width: 38, height: 38, borderRadius: 10, border: "1px solid #ECE9FB", background: "white", cursor: "pointer" }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14132B" strokeWidth="2" strokeLinecap="round">
+              {mobileMenuOpen ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+            </svg>
+          </button>
         </div>
+
+        {/* Mobile dropdown */}
+        {mobileMenuOpen && (
+          <div className="cb-mobile-menu cb-fadeup" style={{ position: "absolute", top: "100%", left: 16, right: 16, marginTop: 8, background: "white", border: "1px solid #ECE9FB", borderRadius: 16, padding: 16, boxShadow: "0 20px 44px -16px rgba(20,19,43,0.25)", zIndex: 50, display: "flex", flexDirection: "column", gap: 4 }}>
+            {["Products", "Solutions", "Tools", "Resources"].map((label) => (
+              <a
+                key={label}
+                href="#"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{ fontFamily: "Inter", fontSize: 15, fontWeight: 600, color: "#14132B", padding: "10px 10px", borderRadius: 10 }}
+              >
+                {label}
+              </a>
+            ))}
+          </div>
+        )}
       </nav>
 
       {/* HERO */}
-      <section style={{ maxWidth: 1180, margin: "0 auto", padding: "12px 24px 48px", position: "relative" }}>
+      <section className="cb-hero-section" style={{ maxWidth: 1180, margin: "0 auto", padding: "12px 24px 48px", position: "relative" }}>
         {/* floating composition layer */}
         <div className="cb-hero-deco" style={{ position: "relative", minHeight: 380, pointerEvents: "none" }}>
           <div style={{ position: "absolute", inset: 0, pointerEvents: "auto" }}>
@@ -332,8 +378,8 @@ function Landing({ isLoggedIn, handleGetStarted, setPage, setAuthMode }) {
         </div>
 
         {/* CENTER CONTENT */}
-        <div style={{ maxWidth: 720, margin: "-300px auto 0", textAlign: "center", position: "relative", zIndex: 6 }}>
-          <h1 className="cb-fadeup" style={{ fontFamily: "Sora", fontWeight: 800, fontSize: "clamp(30px, 4.6vw, 46px)", lineHeight: 1.1, letterSpacing: "-0.02em", color: "#14132B", margin: 0, animationDelay: "0.05s" }}>
+        <div className="cb-hero-content" style={{ maxWidth: 720, margin: "-300px auto 0", textAlign: "center", position: "relative", zIndex: 6, padding: "0 8px" }}>
+          <h1 className="cb-fadeup cb-headline" style={{ fontFamily: "Sora", fontWeight: 800, fontSize: "clamp(30px, 4.6vw, 46px)", lineHeight: 1.1, letterSpacing: "-0.02em", color: "#14132B", margin: 0, animationDelay: "0.05s" }}>
             Understand Why
             <br />
             <span style={{ background: "linear-gradient(135deg, #5B4FE8, #3B82F6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Content Wins</span>
@@ -380,11 +426,11 @@ function Landing({ isLoggedIn, handleGetStarted, setPage, setAuthMode }) {
           </div>
 
           {/* platform row */}
-          <div className="cb-fadeup" style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: 26, flexWrap: "wrap", animationDelay: "0.3s" }}>
+          <div className="cb-fadeup cb-platform-row" style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: 26, flexWrap: "wrap", animationDelay: "0.3s" }}>
             {PLATFORMS.map((p) => (
               <div
                 key={p.name}
-                className="cb-platform"
+                className="cb-platform cb-platform-icon"
                 title={p.name}
                 style={{ "--glow": `${p.color}55`, width: 40, height: 40, borderRadius: 12, background: "white", border: "1px solid #ECE9FB", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
               >

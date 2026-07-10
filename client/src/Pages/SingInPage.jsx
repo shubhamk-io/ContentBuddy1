@@ -17,10 +17,11 @@ export default function SignInPage() {
     try {
       await authClient.signIn.social({
         provider: "google",
+          callbackURL: "http://localhost:5173/dashboard",
         fetchOptions: {
           onSuccess: () => {
             toast.success("Logged in succesfully");
-            navigate("/");
+            navigate("/dashboard");
           },
         },
       });

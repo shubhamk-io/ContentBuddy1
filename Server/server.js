@@ -19,10 +19,10 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json());
-
 // Auth routes
 app.all("/api/auth/*", toNodeHandler(auth));
+
+app.use(express.json());
 
 app.get("/", (req, res) => {
   res.json({ message: "ContentBuddy API running" });
