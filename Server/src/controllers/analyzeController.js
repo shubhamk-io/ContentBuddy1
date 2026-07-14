@@ -1,3 +1,4 @@
+import { analysisGraph } from "../Agents/graphAgent/graph";
 import prisma from "../libs/db";
 import { detectPlatform } from "../utils/detectPlatform";
 
@@ -25,23 +26,34 @@ export const analyzeVideo = async (req, res) => {
                 success:true,
                 message:"User Not Found"})
         }
-
-        // step : 1  Detect Platform
-        const Platform = detectPlatform(contentUrl)
-
         res.json({
             success:true,
             user,
         })
 
 
+        const result = await analysisGraph.invoke({
+            contentUrl
+        })
+
+        if(result.error){
+            return res.status(422).json({success:false , message:result.error})
+        }
+
+
+return res.status(200).json({
+    success:true,
+    data : {
+        orignalAnalysis: result.singleVideoAnalysis,
+        similarVideo: result.similarVideoAnalysis,
+        finalReport : result.finalReport
+    }
+})
 
 
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message:"Internal Server Error"
-        })
-    }
+        console.log("analyzeVideo error:", error);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
     
 }
